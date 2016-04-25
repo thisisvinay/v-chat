@@ -1,10 +1,8 @@
 {
-  "name": "project-alpha",
-  "description": "my super ossom,alpha project.",
+  "name": "socket-chat-example",
   "version": "0.0.1",
+  "description": "my first socket.io app",
   "dependencies": {
-    "body-parser": "^1.13.1",
-    "express": "^4.13.0",
-    "mysql": "^2.7.0"
+    "express": "^4.10.2"
   }
 }

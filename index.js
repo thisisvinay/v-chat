@@ -1,34 +1,27 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var path = require('path');
- 
-// Initialize appication with route / (that means root of the application)
-app.get('/', function(req, res){
-  var express=require('express');
-  app.use(express.static(path.join(__dirname)));
-  res.sendFile(path.join(__dirname, '../chat-application', 'index.html'));
-});
- 
-// Register events on socket connection
-io.on('connection', function(socket){
-  console.log("userConnected");
-  
-  socket.on('chatMessage', function(from, msg){
-    console.log('message: ' + msg);
-    io.emit('chatMessage', from, msg);
-  });
-  socket.on('notifyUser', function(user){
-    /*console.log("check2");*/
-    io.emit('notifyUser', user);
-  });
+'use strict';
 
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
+var PeerServer = require('peer').PeerServer;
+var express = require('express');
+var Topics = require('./public/src/Topics.js');
+var app = express();
+var port = process.env.PORT || 8080;
+
+app.use(express.static(__dirname + '/public'));
+
+var expressServer = app.listen(port);
+var io = require('socket.io').listen(expressServer);
+
+console.log('Magic happens at', port);
+
+var peerServer = new PeerServer({ port: 9000, path: '/chat' });
+
+peerServer.on('connection', function (id) {
+  io.emit(Topics.USER_CONNECTED, id);
+  console.log('User connected with #', id);
 });
- 
-// Listen application request on port 3000
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+
+peerServer.on('disconnect', function (id) {
+  io.emit(Topics.USER_DISCONNECTED, id);
+  console.log('With #', id, 'user disconnected.');
 });
+
